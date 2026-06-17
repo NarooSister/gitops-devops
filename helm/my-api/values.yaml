@@ -5,7 +5,7 @@ replicaCount: 2
 
 image:
   repository: ghcr.io/naroosister/gitops-devops/my-api
-  tag: 6ef26c6
+  tag: ac2018e
   pullPolicy: IfNotPresent
 
 app:
