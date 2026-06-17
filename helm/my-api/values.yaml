@@ -4,8 +4,8 @@ namespace:
 replicaCount: 2
 
 image:
-  repository: my-api
-  tag: local
+  repository: ghcr.io/naroosister/gitops-devops/my-api
+  tag: latest
   pullPolicy: IfNotPresent
 
 app:

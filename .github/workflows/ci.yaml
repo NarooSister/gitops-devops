@@ -9,13 +9,18 @@ on:
       - ".github/workflows/ci.yaml"
 
 permissions:
-  contents: read
+  contents: write
   packages: write
+
+concurrency:
+  group: image-build-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: naroosister/gitops-devops/my-api
-  
+  VALUES_FILE: helm/my-api/values.yaml
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -45,3 +50,54 @@ jobs:
         run: |
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_TAG }}
           docker push ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Update Helm image values
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          values_path = Path("${{ env.VALUES_FILE }}")
+          repository = "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}"
+          tag = "${{ env.IMAGE_TAG }}"
+
+          lines = values_path.read_text(encoding="utf-8").splitlines()
+
+          in_image_block = False
+          updated_lines = []
+
+          for line in lines:
+              stripped = line.strip()
+
+              if stripped == "image:":
+                  in_image_block = True
+                  updated_lines.append(line)
+                  continue
+
+              if in_image_block and line and not line.startswith(" "):
+                  in_image_block = False
+
+              if in_image_block and stripped.startswith("repository:"):
+                  indent = line[:len(line) - len(line.lstrip())]
+                  updated_lines.append(f"{indent}repository: {repository}")
+              elif in_image_block and stripped.startswith("tag:"):
+                  indent = line[:len(line) - len(line.lstrip())]
+                  updated_lines.append(f"{indent}tag: {tag}")
+              else:
+                  updated_lines.append(line)
+
+          values_path.write_text("\n".join(updated_lines) + "\n", encoding="utf-8")
+          PY
+
+      - name: Commit updated Helm values
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet; then
+            echo "No Helm values changes to commit."
+            exit 0
+          fi
+
+          git add ${{ env.VALUES_FILE }}
+          git commit -m "ci: 이미지 태그를 Helm values에 자동 반영 [skip ci]"
+          git push
