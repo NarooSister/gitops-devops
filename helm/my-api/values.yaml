@@ -1,0 +1,47 @@
+namespace:
+  name: my-api
+
+replicaCount: 2
+
+image:
+  repository: my-api
+  tag: local
+  pullPolicy: IfNotPresent
+
+app:
+  env: dev
+  message: "Hello from Helm values"
+  ready: "true"
+
+secret:
+  message: "helm-secret"
+
+service:
+  type: ClusterIP
+  port: 80
+  targetPort: 8080
+
+ingress:
+  enabled: true
+  className: nginx
+  host: my-api.localhost
+  path: /
+  pathType: Prefix
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "256Mi"
+
+probes:
+  readiness:
+    path: /healthz/ready
+    initialDelaySeconds: 3
+    periodSeconds: 5
+  liveness:
+    path: /healthz/live
+    initialDelaySeconds: 10
+    periodSeconds: 10
