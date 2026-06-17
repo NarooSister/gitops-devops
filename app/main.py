@@ -55,3 +55,10 @@ def config():
         "secretLoaded": SECRET_MESSAGE != "secret-not-set",
         "appReady": APP_READY
     }
+
+@app.get("/version")
+def version():
+    return {
+        "version": "v2",
+        "deployment": "argocd-gitops"
+    }
