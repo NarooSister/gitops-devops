@@ -39,7 +39,7 @@ resources:
 
 probes:
   readiness:
-    path: /healthz/wrong-ready
+    path: /healthz/ready
     initialDelaySeconds: 3
     periodSeconds: 5
   liveness:
