@@ -8,6 +8,7 @@ MESSAGE = os.getenv("MESSAGE", "Hello from my-api")
 SECRET_MESSAGE = os.getenv("SECRET_MESSAGE", "secret-not-set")
 
 # readiness 테스트용 플래그
+APP_VERSION = os.getenv("APP_VERSION", "unknown")
 APP_READY = os.getenv("APP_READY", "true").lower() == "true"
 
 @app.get("/")
@@ -60,6 +61,6 @@ def config():
 @app.get("/version")
 def version():
     return {
-        "version": "v2",
+        "version": APP_VERSION,
         "deployment": "argocd-gitops"
     }
