@@ -53,7 +53,8 @@ def config():
         "env": APP_ENV,
         "message": MESSAGE,
         "secretLoaded": SECRET_MESSAGE != "secret-not-set",
-        "appReady": APP_READY
+        "appReady": APP_READY,
+        "version": os.getenv("APP_VERSION", "unknown"),
     }
 
 @app.get("/version")

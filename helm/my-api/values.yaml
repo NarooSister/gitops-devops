@@ -12,6 +12,7 @@ app:
   env: dev
   message: "Hello from Helm values"
   ready: "true"
+  version: "v2"  
 
 secret:
   message: "helm-secret"
